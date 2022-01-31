@@ -10,64 +10,15 @@ let elBtnAll = document.querySelector(".btn__all");
 let elBtnComp = document.querySelector(".btn__comp");
 let elBtnUncomp = document.querySelector(".btn__uncomp");
 
-let todos = [];
-let num = 0;
-
-elBtnAll.addEventListener("click", function() {
-  elTodoList.innerHTML = null;
-
-  renderTodos(todos, elTodoList);
-
-  elAllTodoNumb.textContent = todos.length
-})
-
-elBtnComp.addEventListener("click", function() {
- let todoComplate =  todos.filter(function(todo) {
-    return todo.isCompleted === true
-  })
-
-  elCampTodoNumb.textContent = Number(todoComplate.length)
-
-  elTodoList.innerHTML = null;
-
-  renderTodos(todoComplate, elTodoList);
-
-})
-
-elBtnUncomp.addEventListener("click", function() {
-  let todoUncomplate =  todos.filter(function(todo) {
-     return todo.isCompleted === false
-   })
-   
-   elUncampTodoNumb.textContent = Number(todoComplate.length)
-
-   renderTodos(todoUncomplate, elTodoList);
-
- })
-
-elTodoList.addEventListener("click", function (evt) {
-  if (evt.target.matches(".delete-btn")) {
-    let btnTodoId = Number(evt.target.dataset.todoId);
-    const foundTodoIndex = todos.findIndex((todo) => todo.id === btnTodoId);
-
-    todos.splice(foundTodoIndex, 1);
-
-    elTodoList.innerHTML = null;
-
-    renderTodos(todos, elTodoList);
-  } else if (evt.target.matches(".checkbox-btn")) {
-    let checkTodoId = Number(evt.target.dataset.todoId);
-    let foundCheckTodo = todos.find((todo) => todo.id === checkTodoId);
-
-    foundCheckTodo.isCompleted = !foundCheckTodo.isCompleted;
-
-    elTodoList.innerHTML = null;
-
-    renderTodos(todos, elTodoList);
-  }
-});
-
 let renderTodos = function (arr, element) {
+  elAllTodoNumb.textContent = todos.length;
+
+  elCampTodoNumb.textContent = todos.filter((todo) => todo.isCompleted).length;
+
+  elUnampTodoNumb.textContent =  todos.filter(function(todo) {
+    return !todo.isCompleted;
+  }).length;
+
   arr.forEach(function (todo) {
     let newItem = document.createElement("li");
     let newAlertText = document.createElement("p");
@@ -105,6 +56,59 @@ let renderTodos = function (arr, element) {
   });
 };
 
+const localTodos = JSON.parse(window.localStorage.getItem("localTodos"));
+
+let todos = localTodos || [];
+renderTodos(todos, elTodoList)
+let num = 0;
+
+elBtnAll.addEventListener("click", function() {
+
+  elTodoList.innerHTML = null;
+  renderTodos(todos, elTodoList);
+})
+
+elBtnComp.addEventListener("click", function() {
+ let todoComplate =  todos.filter(function(todo) {
+    return todo.isCompleted === true
+  })
+  elTodoList.innerHTML = null;
+  renderTodos(todoComplate, elTodoList);
+})
+
+elBtnUncomp.addEventListener("click", function() {
+  let todoUncomplate =  todos.filter(function(todo) {
+     return todo.isCompleted === false
+   })
+  elTodoList.innerHTML = null;
+   renderTodos(todoUncomplate, elTodoList);
+ })
+
+elTodoList.addEventListener("click", function (evt) {
+  if (evt.target.matches(".delete-btn")) {
+    let btnTodoId = Number(evt.target.dataset.todoId);
+    const foundTodoIndex = todos.findIndex((todo) => todo.id === btnTodoId);
+
+    todos.splice(foundTodoIndex, 1);
+
+    elTodoList.innerHTML = null;
+
+    renderTodos(todos, elTodoList);
+    window.localStorage.setItem("localTodos", JSON.stringify(todos))
+  } else if (evt.target.matches(".checkbox-btn")) {
+    let checkTodoId = Number(evt.target.dataset.todoId);
+    let foundCheckTodo = todos.find((todo) => todo.id === checkTodoId);
+
+    foundCheckTodo.isCompleted = !foundCheckTodo.isCompleted;
+
+    elTodoList.innerHTML = null;
+
+    renderTodos(todos, elTodoList);
+    window.localStorage.setItem("localTodos", JSON.stringify(todos))
+
+  }
+});
+
 elTodoForm.addEventListener("submit", function (evt) {
   evt.preventDefault();
 
@@ -117,9 +121,11 @@ elTodoForm.addEventListener("submit", function (evt) {
   };
 
   todos.push(newTodo);
+  window.localStorage.setItem("localTodos", JSON.stringify(todos));
 
   elTodoInput.value = null;
   elTodoList.innerHTML = null;
 
   renderTodos(todos, elTodoList);
+
 });
